@@ -17,3 +17,9 @@ def getSize():
 def getUser():
     return usuario
 
+def setApi(link):
+    global api
+    api = link
+
+def getApi():
+    return api

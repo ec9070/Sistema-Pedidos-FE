@@ -3,10 +3,13 @@ import util.globals as globales
 import util.generic as utl
 from PIL import Image
 import re
-from controller.Usuario import Usuario
-from CTkMessagebox import CTkMessagebox as Message
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 class Login():
     def __init__(self):
+        self.api = globales.getApi()
         # Creacion de la ventana
         self.ventana = CTk()
         w = (int(self.ventana.winfo_screenwidth()))
@@ -25,13 +28,13 @@ class Login():
         self.ventana.resizable(0,0)
         if(apariencia=="dark"):
             self.fondo="#484b4f"
-            self.img="./util/img/LoginImgDark.png"
+            self.img="./img/LoginImgDark.png"
             self.color_texto="white"
             self.entry="#6e6f73"
             self.holder_color="#C4C4C4"
         else:
             self.fondo="white"
-            self.img="./util/img/LoginImg.png"
+            self.img="./img/LoginImg.png"
             self.color_texto="black"
             self.entry="white"
             self.holder_color="#8F7C7C"
@@ -90,23 +93,17 @@ class Login():
         else:
             self.correo_validate.configure(text="")
             self.contra_validate.configure(text="")
-            user = Usuario.getByCorreo(correo)
-            if user:
-                contra = utl.hash(contra)
-                if(contra==user[2]):
-                    usuario=[user[0],user[1],user[3],user[4],user[5],user[6]]
-                    globales.setUser(usuario)
-                    self.ventana.withdraw()
-                    VentanaPrincipal(self.ventana)
-                else:
-                    Message(title="Error de inicio de sesión", message="Contraseña incorrecta", icon="cancel")
-            else:
-                Message(title="Error de inicio de sesión", message="Correo incorrecto", icon="cancel")
-
+            logged = self.api.login(correo, contra)
+            if logged:
+                self.correo.set("")
+                self.contrasenna.set("")
+                self.ventana.withdraw()
+                VentanaPrincipal(self.ventana)
+            
     def aux(self):
-        usuario=[1,'ec9070@gmail.com','Admin',None,None,'Administrador']
-        globales.setUser(usuario)
-        self.ventana.withdraw()
-        VentanaPrincipal(self.ventana)
+        logged = self.api.login(os.getenv("USER"), os.getenv("PASS"))
+        if logged:
+            self.ventana.withdraw()
+            VentanaPrincipal(self.ventana)
         
 from forms.ventana_principal import VentanaPrincipal
